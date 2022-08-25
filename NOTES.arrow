@@ -1,0 +1,50 @@
+https://observablehq.com/@kylebarron/geoarrow-and-geoparquet-in-deck-gl
+https://nbviewer.org/gist/jorisvandenbossche/00e5c4a54f7b94375ccc6921c07825a0
+
+Point or Polygon files can get very large, think:
+- all fixes of a GPS collection system
+- all building outlines of a city, state or country
+- all parcels over EU
+
+LIDAR data is a special topic, see e.g. COPC.io
+
+Why not a regular database, like PostGIS?
+
+Because: 
+ * very large databases are hard to manage (dump, upgrade software, restore)
+ * databases require software to be running
+ * running cloud instances is more expensive that storage
+ * administrative burden to set it up scalable (storage, parallel)
+
+Google BigQuery: stateless DB
+ * store data in big files (e.g. collections of csv)
+ * run query involves: read data, process, write output, quit
+ * only storage cost involved, and runtime of the query only
+ * can read & write be done faster?
+
+More efficient than .csv:
+ * binary
+ * indexed
+ * columnar storage model (SAP HANA, DuckDB, R, Python, ...)
+ * analysis by variable, rather than by record
+
+Parquet:
+ * binary, columnar storage
+ * indexed, compressed, chunked
+ * meant for storage (write once, read often)
+
+Arrow:
+ * binary, columnar, 
+ * focus on memory layout, 
+ * meant for performance, not (primarily) for storage
+ * VC backed (Voltrondata)
+
+Both are Apache projects (open source, cloud oriented)
+Both have 
+ * GEO extensions (geometry column)
+ * (bleeding edge) GDAL drivers
+
+How to leverage parallel computing, distributing over
+ * cores
+ * machines
+
