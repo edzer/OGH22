@@ -1,0 +1,145 @@
+---
+title: "Tabular data, columnar storage"
+author: "Edzer Pebesma"
+date: "August 28, 2022"
+---
+
+
+# Tables
+
+Tabular data are data in tables, such as those in
+
+* CSV files
+* relational databases
+* (simple) Excel spreadsheets
+* R: `data.frame`
+* Python: panda
+
+Tables have the following properties:
+
+* row/column layout: 
+   * records are in rows and correspond to observations
+   * variables are in columns, and are of homogeneous type
+   * type can be integer, floating point, Date, text, ...
+   * variables have names, records usually not
+
+Spatial data in tables is usually stored by adding a special column,
+the _geometry column_. Geometry is often stored as simple feature
+geometry (POINT, LINESTRING, MULTILINESTRING, POLYGON, MULTIPOLYGON
+etc), in which case records correspond to _simple features_ (things
+with geometry and further attributes in non-geometry columns).
+
+Consider the following .csv file:
+```
+"var_a","date","name"
+1,2022-08-29,"Alice"
+2,2022-08-30,"Bob"
+3,2022-08-31,"Charlie"
+```
+
+
+```{r}
+df = read.csv("example.csv", colClasses = c("numeric", "Date", "character"))
+df
+df |> str()
+df |> unclass() |> class()
+df |> unclass()
+```
+
+```{r echo=FALSE}
+df = data.frame(var_a = 1:3, date = Sys.Date() + 1:3, name = c("Alice", "Bob", "Charlie"))
+write.csv(df, "example.csv", row.names = FALSE)
+```
+
+# Row vs. Columnar storage
+
+Columnar storage means that values in a column are stored
+continuously in memory. Instead of storing record 2 directly after
+record 1, the value 2 of `var_a` is stored directly after 1 and
+before 3. Using R, we can fake a row-wise storage, by making every
+record a list:
+
+```{r}
+row_ify = function(x) {
+  lapply(seq_len(nrow(x)), function(i) x[i,])
+}
+row_ify(df)
+n = 100000
+df = data.frame(x = runif(n), char = "foo", date = Sys.Date())
+head(df)
+df.rows = row_ify(df)
+# iterate over rows
+f0 = function(x) {
+  m0 = 0.0
+  for (i in seq_along(x))
+    m0 = m0 + df.rows[[i]][[1]]
+  m0 / length(x)
+}
+bench::mark(
+  f0(df.rows), 
+  mean(sapply(df.rows, `[[`, 1)),
+  mean(df$x)
+)
+```
+The first function extracts row elements in a `for` loop, the second
+uses `sapply` instead of that loop, the third works directly on the
+`data.frame` column.
+
+We see that columnar storage (like a `data.frame` has) is much
+faster if the operation is columnar. A lot of statistical operations
+are columnar!
+
+# Other implementations
+
+* DuckDB
+* Google Big Query
+* SAP HANA
+
+Why not use a regular database, like PostGIS?
+
+Because: 
+
+* very large databases are hard to manage (dump, upgrade software, restore)
+* databases require software to be running
+* running cloud instances is more expensive that storage
+* administrative burden to set it up scalable (storage, parallel)
+
+Google BigQuery: stateless DB, "serverless data warehouse"
+
+* store data in big files (e.g. collections of csv or Parquet)
+* run query involves: read data, process, write output, quit
+* costs: storage + runtime of the query, not a running service
+* optimizing costs: 
+	* how can storage be reduced?
+    * how can read & write be done faster?
+
+More efficient than .csv:
+
+* binary
+* indexed
+* columnar storage model
+* analyse by variable, rather than by record
+
+Parquet:
+
+* binary, columnar storage
+* indexed, compressed, chunked
+* meant for storage (write once, read often)
+
+Arrow:
+
+* binary, columnar, 
+* focus on memory layout, 
+* meant for performance, not (primarily) for storage
+* backed by Voltrondata (VC)
+
+Both Arrow and Parquet are Apache projects (open source, cloud oriented)
+Both have 
+
+* GEO extensions (geometry column, simple features+)
+* (bleeding edge) GDAL drivers (>= 3.5), + GDAL columnar read interface
+
+How to leverage parallel computing, distributing over
+
+* cores
+* machines

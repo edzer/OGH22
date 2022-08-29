@@ -4,7 +4,7 @@ https://nbviewer.org/gist/jorisvandenbossche/00e5c4a54f7b94375ccc6921c07825a0
 Point or Polygon files can get very large, think:
 - all fixes of a GPS collection system
 - all building outlines of a city, state or country
-- all parcels over EU
+- all agricultural parcels over EU
 
 LIDAR data is a special topic, see e.g. COPC.io
 
@@ -41,8 +41,8 @@ Arrow:
 
 Both are Apache projects (open source, cloud oriented)
 Both have 
- * GEO extensions (geometry column)
- * (bleeding edge) GDAL drivers
+ * GEO extensions (geometry column, simple features+)
+ * (bleeding edge) GDAL drivers (>= 3.5), + GDAL columnar read interface
 
 How to leverage parallel computing, distributing over
  * cores

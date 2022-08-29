@@ -1,0 +1,123 @@
+---
+title: "Time and spatial data"
+author: "Edzer Pebesma"
+date: "August 29, 2022"
+---
+
+
+# Time
+
+
+Load the foot-and-mouth disease data from package `stpp`:
+
+```{r}
+data(fmd, package = "stpp")
+head(fmd)
+class(fmd)
+library(sf)
+library(dplyr)
+fmd1 <- fmd |> 
+  as.data.frame() |> 
+  st_as_sf(coords = c("X", "Y")) |>
+  mutate(time = as.Date("2001-02-01") + ReportedDay)
+fmd1
+data(northcumbria, package = "stpp")
+head(northcumbria)
+class(northcumbria)
+northc = st_sfc(st_polygon(list(rbind(northcumbria, northcumbria[1,]))))
+northc
+```
+
+Create a plot of all points, with `time` the colored attribute:
+
+```{r}
+plot(fmd1["time"], extent = northc, reset = FALSE, cex = .6, pch = 16)
+plot(northc, add = TRUE)
+```
+
+We can also do this with `ggplot2`:
+```{r}
+library(ggplot2)
+ggplot(fmd1) + geom_sf(data = northc) +  geom_sf(aes(col = time))
+```
+
+and, in that case, easily create faceted plots, here by 4 time classes,
+facet label indicating the start of the time interval:
+```{r}
+ggplot(fmd1) + 
+  geom_sf(data = northc) + 
+  geom_sf(aes(col = time)) +
+  facet_wrap(~cut(time, "2 months")) + 
+  theme_void()
+```
+
+# Time as a coordinate
+
+As said, in the above time is an attribute column like any other.
+Package `sftime` creates objects where time, like space, is a
+coordinate pointing out space-time geometry.
+
+```{r}
+library(sftime)
+fmd_t = fmd1
+st_time(fmd_t) = fmd1$time
+fmd_t
+```
+Alternatively, we could use `ReportedDay` as the time coordinate:
+```{r}
+fmd_d = fmd1
+st_time(fmd_d) = fmd1$ReportedDay
+fmd_d
+```
+
+`sftime` objects derive from `sf` objects, and the dedicated
+methods for them largely reflect methods available for `sf`
+objects:
+```{r}
+methods(class = "sftime")
+```
+
+As an exploratory step (before the space-time density modelling
+and estimation of Gabriel et al.)  we may want to count cases
+over a space-time grid, e.g. over 60-day intervals.
+
+```{r}
+fmd1$time_c = cut(fmd1$time, "30 days")
+library(stars)
+st = st_as_stars(northc, dx = 20000)
+st_as_sf(st) |> st_geometry() |> plot()
+plot(northc, border = 'red', lwd = 2, add = TRUE)
+```
+
+For each time interval, we can count records by
+```{r}
+geom = st_as_sf(st)
+st$values = NULL
+for (i in levels(fmd1$time_c))
+	st[[ paste0("v", i) ]] = aggregate(fmd1[fmd1$time_c == i, "time"], geom, length)$time
+st
+```
+
+We can move that into a three-dimensional (x/y/time) datacube by:
+```{r}
+st <- st |> 
+  merge(name = "time") |> 
+  st_set_dimensions(3, values = as.Date(levels(fmd1$time_c))) |>
+  setNames("count")
+st[is.na(st)] = 0
+st
+plot(st, breaks = "equal", hook = function() plot(northc, border = 'red', add = TRUE))
+```
+
+... and plot, using `ggplot()`:
+
+```{r eval=TRUE}
+library(ggplot2)
+library(stars)
+ggplot() + geom_stars(data = st) +
+        facet_wrap(~time) + coord_equal() +
+        theme_void() +
+        scale_x_discrete(expand = c(0,0)) +
+        scale_y_discrete(expand = c(0,0)) +
+        scale_fill_viridis_c()
+```
