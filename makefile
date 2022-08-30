@@ -1,4 +1,4 @@
-TARGET	= time
+TARGET	= rv
 
 all:
 	make edit

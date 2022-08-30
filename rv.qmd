@@ -1,0 +1,87 @@
+---
+title: "Raster or vector?"
+author: "Edzer Pebesma"
+date: "August 30, 2022"
+---
+
+
+What are the differences between the following two datasets, `r` and `v`?
+
+
+```{r}
+library(sf)
+library(stars)
+bb = st_bbox(c(xmin = 0, xmax = 10, ymin = 0, ymax = 10))
+r = st_as_stars(bb, nx = 10, ny = 10)
+r$values = rnorm(100)
+plot(r, breaks = "equal", axes = TRUE, col = sf.colors(), reset = FALSE)
+box()
+```
+
+```{r}
+v = st_as_sf(r)
+plot(v, axes = TRUE)
+```
+
+Let's see how the objects are printed:
+```{r}
+r
+v
+```
+
+Let's see how they behave when we intersect a point inside a cell:
+
+```{r}
+pt = st_as_sfc("POINT(0.5 0.5)")
+x = st_intersects(r, pt, as_points = FALSE)
+t(x)
+st_intersects(pt, v)
+plot(v, axes = TRUE, reset = FALSE)
+plot(v[91,], col = 'grey', add = TRUE)
+plot(pt, add = TRUE, col = 'red', pch = 16, cex = 1.5)
+text(.5, .8, "91")
+```
+
+... with a point on a cell border:
+```{r}
+pt = st_as_sfc("POINT(1 0.5)")
+x = st_intersects(r, pt, as_points = FALSE)
+t(x)
+y = st_intersects(pt, v)
+plot(v, axes = TRUE, reset = FALSE)
+plot(v[91:92,], col = 'grey', add = TRUE)
+plot(pt, add = TRUE, col = 'red', pch = 16, cex = 1.5)
+text(c(.5, 1.5), c(.5, .5), c("91", "92"))
+```
+
+... with a point on a cell corner:
+```{r}
+pt = st_as_sfc("POINT(1 1)")
+x = st_intersects(r, pt, as_points = FALSE)
+t(x)
+y = st_intersects(pt, v)
+y
+plot(v, axes = TRUE, reset = FALSE)
+plot(v[c(81,82,91,92),], col = 'grey', add = TRUE)
+plot(pt, add = TRUE, col = 'red', pch = 16, cex = 1.5)
+text(c(.5, 1.5, .5, 1.5), c(1.5, 1.5, .5, .5), c("81", "82", "91", "92"))
+```
+
+
+... with s2:
+```{r}
+st_crs(r) = 4326
+st_crs(v) = 4326
+pt = st_as_sfc("POINT(1 0.5)")
+st_crs(pt) = 4326
+y = st_intersects(pt, v)
+y
+plot(v, axes = TRUE, reset = FALSE)
+plot(v[91:92,], col = 'grey', add = TRUE)
+plot(pt, add = TRUE, col = 'red', pch = 16, cex = 1.5)
+text(c(.5, 1.5), c(.5, .5), c("91", "92"))
+pt = st_as_sfc("POINT(0.5 1)")
+st_crs(pt) = 4326
+y = st_intersects(pt, v)
+y
+```
