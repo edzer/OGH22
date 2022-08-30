@@ -85,3 +85,33 @@ st_crs(pt) = 4326
 y = st_intersects(pt, v)
 y
 ```
+
+Southern Hemisphere:
+```{r}
+bb = st_bbox(c(xmin = 0, xmax = 10, ymin = -10, ymax = 0))
+r_s = st_as_stars(bb, nx = 10, ny = 10)
+r_s$values = r$values
+st_crs(r_s) = 4326
+plot(r_s, breaks = "equal", axes = TRUE, col = sf.colors(), reset = FALSE)
+box()
+pt = st_as_sfc("POINT(0.5 -1)")
+st_crs(pt) = 4326
+v = st_as_sf(r_s)
+st_intersects(pt, v)
+```
+
+```{r}
+plot(v, axes = TRUE, reset = FALSE)
+plot(v[1,], col = 'grey', add = TRUE)
+plot(pt, add = TRUE, col = 'red', pch = 16, cex = 1.5)
+text(c(.5, .5), c(-.5, -1.5), c("1", "11"))
+```
+
+Removing CRS assumes $R^2$:
+```{r}
+st_crs(pt) = NA
+st_crs(v) = NA
+st_intersects(pt, v)
+st_crs(r_s) = NA
+st_intersects(r_s, pt, as_points = FALSE) |> t()
+```

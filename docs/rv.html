@@ -94,6 +94,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <link href="rv_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="rv_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 </head>
 
@@ -163,8 +164,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="cell-output cell-output-stdout">
 <pre><code>stars object with 2 dimensions and 1 attribute
 attribute(s):
-             Min.    1st Qu.      Median       Mean   3rd Qu.     Max.
-values  -2.498724 -0.7355969 -0.02333317 0.02227426 0.7697885 3.013006
+             Min.    1st Qu.     Median      Mean   3rd Qu.     Max.
+values  -2.130422 -0.8520881 0.07084188 0.0276221 0.7399595 2.498654
 dimension(s):
   from to offset delta refsys point values x/y
 x    1 10      0     1     NA    NA   NULL [x]
@@ -178,17 +179,17 @@ Dimension:     XY
 Bounding box:  xmin: 0 ymin: 0 xmax: 10 ymax: 10
 CRS:           NA
 First 10 features:
-        values                       geometry
-1  -0.07529115 POLYGON ((0 10, 1 10, 1 9, ...
-2   0.96708090 POLYGON ((1 10, 2 10, 2 9, ...
-3  -0.98666937 POLYGON ((2 10, 3 10, 3 9, ...
-4   0.69916834 POLYGON ((3 10, 4 10, 4 9, ...
-5  -0.58172863 POLYGON ((4 10, 5 10, 5 9, ...
-6   0.42630921 POLYGON ((5 10, 6 10, 6 9, ...
-7  -1.94296699 POLYGON ((6 10, 7 10, 7 9, ...
-8  -1.81625739 POLYGON ((7 10, 8 10, 8 9, ...
-9  -1.01926616 POLYGON ((8 10, 9 10, 9 9, ...
-10 -0.28102306 POLYGON ((9 10, 10 10, 10 9...</code></pre>
+       values                       geometry
+1  -1.9785587 POLYGON ((0 10, 1 10, 1 9, ...
+2  -1.5540369 POLYGON ((1 10, 2 10, 2 9, ...
+3   0.1792431 POLYGON ((2 10, 3 10, 3 9, ...
+4   1.8772797 POLYGON ((3 10, 4 10, 4 9, ...
+5   0.2429183 POLYGON ((4 10, 5 10, 5 9, ...
+6  -2.1304223 POLYGON ((5 10, 6 10, 6 9, ...
+7  -0.1367457 POLYGON ((6 10, 7 10, 7 9, ...
+8  -0.9362822 POLYGON ((7 10, 8 10, 8 9, ...
+9  -0.7394552 POLYGON ((8 10, 9 10, 9 9, ...
+10  0.1825348 POLYGON ((9 10, 10 10, 10 9...</code></pre>
 </div>
 </div>
 <p>Let’s see how they behave when we intersect a point inside a cell:</p>
@@ -287,6 +288,54 @@ was `intersects'
 <pre><code>Sparse geometry binary predicate list of length 1, where the predicate
 was `intersects'
  1: 91</code></pre>
+</div>
+</div>
+<p>Southern Hemisphere:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>bb <span class="ot">=</span> <span class="fu">st_bbox</span>(<span class="fu">c</span>(<span class="at">xmin =</span> <span class="dv">0</span>, <span class="at">xmax =</span> <span class="dv">10</span>, <span class="at">ymin =</span> <span class="sc">-</span><span class="dv">10</span>, <span class="at">ymax =</span> <span class="dv">0</span>))</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>r_s <span class="ot">=</span> <span class="fu">st_as_stars</span>(bb, <span class="at">nx =</span> <span class="dv">10</span>, <span class="at">ny =</span> <span class="dv">10</span>)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>r_s<span class="sc">$</span>values <span class="ot">=</span> r<span class="sc">$</span>values</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(r_s) <span class="ot">=</span> <span class="dv">4326</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(r_s, <span class="at">breaks =</span> <span class="st">"equal"</span>, <span class="at">axes =</span> <span class="cn">TRUE</span>, <span class="at">col =</span> <span class="fu">sf.colors</span>(), <span class="at">reset =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="fu">box</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="rv_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>pt <span class="ot">=</span> <span class="fu">st_as_sfc</span>(<span class="st">"POINT(0.5 -1)"</span>)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(pt) <span class="ot">=</span> <span class="dv">4326</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>v <span class="ot">=</span> <span class="fu">st_as_sf</span>(r_s)</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="fu">st_intersects</span>(pt, v)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Sparse geometry binary predicate list of length 1, where the predicate
+was `intersects'
+ 1: 1</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(v, <span class="at">axes =</span> <span class="cn">TRUE</span>, <span class="at">reset =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(v[<span class="dv">1</span>,], <span class="at">col =</span> <span class="st">'grey'</span>, <span class="at">add =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(pt, <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col =</span> <span class="st">'red'</span>, <span class="at">pch =</span> <span class="dv">16</span>, <span class="at">cex =</span> <span class="fl">1.5</span>)</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="fu">c</span>(.<span class="dv">5</span>, .<span class="dv">5</span>), <span class="fu">c</span>(<span class="sc">-</span>.<span class="dv">5</span>, <span class="sc">-</span><span class="fl">1.5</span>), <span class="fu">c</span>(<span class="st">"1"</span>, <span class="st">"11"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="rv_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Removing CRS assumes <span class="math inline">\(R^2\)</span>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(pt) <span class="ot">=</span> <span class="cn">NA</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(v) <span class="ot">=</span> <span class="cn">NA</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="fu">st_intersects</span>(pt, v)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Sparse geometry binary predicate list of length 1, where the predicate
+was `intersects'
+ 1: 1, 11</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(r_s) <span class="ot">=</span> <span class="cn">NA</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">st_intersects</span>(r_s, pt, <span class="at">as_points =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span> <span class="fu">t</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Sparse geometry binary predicate list of length 1, where the predicate
+was `intersects'
+ 1: 11</code></pre>
 </div>
 </div>
 
