@@ -1,11 +1,12 @@
 # OGH22
 OpenGeoHub summer school 2022 materials
 
-Rendered pages:
+Items:
 
-* [raster-vector](https://edzer.github.io/OGH22/rv.html)
+* [raster-vector](https://edzer.github.io/OGH22/rv.html) 
 * [time](https://edzer.github.io/OGH22/time.html)
 * [columnar](https://edzer.github.io/OGH22/columnar.html)
+* Dockerfile for [GDAL+Parquet+Arrow support](https://github.com/r-spatial/sf/tree/main/inst/docker/arrow)
 
 ## Part 1, Tue 13:30 - 15:00
 
@@ -22,3 +23,4 @@ we will discuss spherical geometry, spatiotemporal information,
 irregular spatiotemporal data in `sftime`, spatiotemporal raster
 and vector data cubes in package `stars`, and if we have time left
 chapter 5 on support of spatial data.
+
